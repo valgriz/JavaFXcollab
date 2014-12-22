@@ -26,6 +26,7 @@ public class Main extends Application {
 	@Override
 	// start method in application class
 	public void start(Stage primaryStage) {
+
 		// Create a scene and place the button in the scene
 		Scene twoPercent = new Scene(new Button("2%"), 250, 250);
 		primaryStage.setTitle("2%");
@@ -79,6 +80,9 @@ public class Main extends Application {
 		secondStage.show();
 
 		Basis basis = new Basis();
+		// Loops loops = new Loops();
+
+		Anim anim = new Anim();
 	}
 
 	public void randomizeColors(Rectangle[] r) {
