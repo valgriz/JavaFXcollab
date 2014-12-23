@@ -83,6 +83,8 @@ public class Main extends Application {
 		// Loops loops = new Loops();
 
 		Anim anim = new Anim();
+
+		JumpGame jumpGame = new JumpGame();
 	}
 
 	public void randomizeColors(Rectangle[] r) {
