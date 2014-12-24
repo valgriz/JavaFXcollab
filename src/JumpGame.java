@@ -116,7 +116,7 @@ public class JumpGame extends Main {
 		background.getChildren().add(birdGroup);
 
 		//
-		dT = .5;
+		dT = .2;
 		gravity = 20;
 
 		allignPlatformConfiguration();
@@ -198,7 +198,7 @@ public class JumpGame extends Main {
 				for (int i = 0; i < platformArray.length; i++) {
 					if (birdY > platformArray[i].getY()) {
 						if (birdX > platformArray[i].getX() && birdX < platformArray[i].getX() + 105) {
-							gravity =-gravity;
+							birdDy = -birdDy;
 						}
 
 					}
