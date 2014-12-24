@@ -57,6 +57,8 @@ public class JumpGame extends Main {
 	private double energyLoss;
 	private double dT;
 
+	private boolean transMomentum;
+
 	private double birdX, birdY, birdDx, birdDy;
 
 	public JumpGame() {
@@ -68,7 +70,6 @@ public class JumpGame extends Main {
 		s.setResizable(false);
 
 		birdX = birdY = 20;
-		birdDx = birdDy = 1;
 
 		r = new Random();
 
@@ -100,6 +101,8 @@ public class JumpGame extends Main {
 		backgroundX = 0;
 		backgroundDx = .6;
 
+		transMomentum = false;
+
 		platformArray = new ImageView[5];
 
 		platformGroup = new Group();
@@ -116,8 +119,8 @@ public class JumpGame extends Main {
 		background.getChildren().add(birdGroup);
 
 		//
-		dT = .5;
-		gravity = 20;
+		dT = 1;
+		gravity = 1.2;
 
 		allignPlatformConfiguration();
 
@@ -128,10 +131,10 @@ public class JumpGame extends Main {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.LEFT | event.getCode() == KeyCode.A) {
-					birdDx = -1;
+					birdDx = -3;
 				}
 				if (event.getCode() == KeyCode.RIGHT | event.getCode() == KeyCode.D) {
-					birdDx = 1;
+					birdDx = 3;
 				}
 
 			}
@@ -187,20 +190,13 @@ public class JumpGame extends Main {
 				backgroundImageView2.setX(WIDTH + backgroundX);
 				backgroundX -= backgroundDx;
 
-				System.out.println("X: " + birdX);
-
-				System.out.println("Y: " + birdY);
-
-				System.out.println("dX: " + birdDx);
-
-				System.out.println("dY: " + birdDy);
-
 				for (int i = 0; i < platformArray.length; i++) {
 					if (birdY > platformArray[i].getY()) {
-						if (birdX > platformArray[i].getX() && birdX < platformArray[i].getX() + 105) {
-							gravity =-gravity;
+						if (birdX > platformArray[i].getX() && birdX < platformArray[i].getX() + 105 && birdY > 200) {
+							// birdY = platformArray[i].getY();
+							// birdDy = -birdDy
+							transMomentum = true;
 						}
-
 					}
 					platformArray[i].setX(platformArray[i].getX() - .85);
 					if (platformArray[i].getX() + 104 < 0) {
@@ -209,6 +205,7 @@ public class JumpGame extends Main {
 					}
 				}
 
+				conserveMomentum();
 				updateBird();
 
 				if (backgroundX <= -WIDTH) {
@@ -227,10 +224,32 @@ public class JumpGame extends Main {
 
 	}
 
-	public void updateBird() {
-		birdX = ((int) (birdImageView.getX() + birdDx));
+	public void conserveMomentum() {
+		if (transMomentum = true) {
+			birdDy = -birdDy;
+			transMomentum = false;
+		}
+	}
+
+	public void gravBird() {
+		birdDy = (birdDy * dT) + (.5 * gravity * dT * dT);
 		birdDy += gravity * dT;
-		birdY = (((birdDy * dT) + (.5 * gravity * dT * dT)));
+
+	}
+
+	public void updateBird() {
+
+		if (birdY > HEIGHT - 70) {
+			// birdDy = -birdDy;
+		} else {
+
+		}
+
+		gravBird();
+
+		birdY += birdDy;
+		birdX += birdDx;
+
 		birdImageView.setX(birdX);
 		birdImageView.setY(birdY);
 	}
