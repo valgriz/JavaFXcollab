@@ -61,6 +61,8 @@ public class JumpGame extends Main {
 
 	private double birdX, birdY, birdDx, birdDy;
 
+	private boolean hit;
+
 	public JumpGame() {
 		s = new Stage();
 		s.show();
@@ -91,6 +93,10 @@ public class JumpGame extends Main {
 			ivArray[i].setX(20 * (r.nextInt(24)));
 			ivArray[i].setY(20 * (r.nextInt(5)));
 		}
+
+		hit = false;
+		dT = 1;
+		gravity = 2;
 
 		backgroundImageView2.setX(WIDTH);
 		background = new Group(backgroundImageView1, backgroundImageView2, foregroundGroup);
@@ -127,10 +133,10 @@ public class JumpGame extends Main {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.LEFT | event.getCode() == KeyCode.A) {
-					birdDx = -3;
+					birdDx = -5;
 				}
 				if (event.getCode() == KeyCode.RIGHT | event.getCode() == KeyCode.D) {
-					birdDx = 3;
+					birdDx = 5;
 				}
 
 			}
@@ -151,6 +157,13 @@ public class JumpGame extends Main {
 	}
 
 	private void updateBird() {
+
+		if (hit) {
+			birdDy = -birdDy;
+			hit = false;
+		} else {
+			birdDy = (birdDy * dT) + (.5 * gravity * dT * dT);
+		}
 		birdX += birdDx;
 		birdY += birdDy;
 		birdImageView.setX(birdX);
@@ -195,6 +208,12 @@ public class JumpGame extends Main {
 
 				for (int i = 0; i < platformArray.length; i++) {
 					platformArray[i].setX(platformArray[i].getX() - .85);
+					if (birdX + 35 >= platformArray[i].getX() && birdX <= (platformArray[i].getX() + 104)) {
+						if (birdY + 35 >= platformArray[i].getY() && birdY + 35 <= platformArray[i].getY() + 30
+								&& birdDy > 0) {
+							hit = true;
+						}
+					}
 					if (platformArray[i].getX() + 104 < 0) {
 						platformArray[i].setX(WIDTH + r.nextInt(120));
 						platformArray[i].setY(170 + r.nextInt(100));
