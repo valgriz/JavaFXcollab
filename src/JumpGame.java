@@ -57,6 +57,8 @@ public class JumpGame extends Main {
 	private double energyLoss;
 	private double dT;
 
+	private boolean transMomentum;
+
 	private double birdX, birdY, birdDx, birdDy;
 
 	public JumpGame() {
@@ -68,7 +70,6 @@ public class JumpGame extends Main {
 		s.setResizable(false);
 
 		birdX = birdY = 20;
-		birdDx = birdDy = 1;
 
 		r = new Random();
 
@@ -100,6 +101,8 @@ public class JumpGame extends Main {
 		backgroundX = 0;
 		backgroundDx = .6;
 
+		transMomentum = false;
+
 		platformArray = new ImageView[5];
 
 		platformGroup = new Group();
@@ -115,10 +118,6 @@ public class JumpGame extends Main {
 		Group birdGroup = new Group(birdImageView);
 		background.getChildren().add(birdGroup);
 
-		//
-		dT = .2;
-		gravity = 20;
-
 		allignPlatformConfiguration();
 
 		animateBackgroundUsingTimeline();
@@ -128,10 +127,10 @@ public class JumpGame extends Main {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.LEFT | event.getCode() == KeyCode.A) {
-					birdDx = -1;
+					birdDx = -3;
 				}
 				if (event.getCode() == KeyCode.RIGHT | event.getCode() == KeyCode.D) {
-					birdDx = 1;
+					birdDx = 3;
 				}
 
 			}
@@ -149,6 +148,13 @@ public class JumpGame extends Main {
 			}
 		});
 
+	}
+
+	private void updateBird() {
+		birdX += birdDx;
+		birdY += birdDy;
+		birdImageView.setX(birdX);
+		birdImageView.setY(birdY);
 	}
 
 	private void allignPlatformConfiguration() {
@@ -187,29 +193,13 @@ public class JumpGame extends Main {
 				backgroundImageView2.setX(WIDTH + backgroundX);
 				backgroundX -= backgroundDx;
 
-				System.out.println("X: " + birdX);
-
-				System.out.println("Y: " + birdY);
-
-				System.out.println("dX: " + birdDx);
-
-				System.out.println("dY: " + birdDy);
-
 				for (int i = 0; i < platformArray.length; i++) {
-					if (birdY > platformArray[i].getY()) {
-						if (birdX > platformArray[i].getX() && birdX < platformArray[i].getX() + 105) {
-							birdDy = -birdDy;
-						}
-
-					}
 					platformArray[i].setX(platformArray[i].getX() - .85);
 					if (platformArray[i].getX() + 104 < 0) {
 						platformArray[i].setX(WIDTH + r.nextInt(120));
 						platformArray[i].setY(170 + r.nextInt(100));
 					}
 				}
-
-				updateBird();
 
 				if (backgroundX <= -WIDTH) {
 					backgroundX = 0;
@@ -222,17 +212,12 @@ public class JumpGame extends Main {
 						ivArray[i].setY(20 * r.nextInt(5));
 					}
 				}
+
+				updateBird();
+
 			}
 		})).build().play();
 
-	}
-
-	public void updateBird() {
-		birdX = ((int) (birdImageView.getX() + birdDx));
-		birdDy += gravity * dT;
-		birdY = (((birdDy * dT) + (.5 * gravity * dT * dT)));
-		birdImageView.setX(birdX);
-		birdImageView.setY(birdY);
 	}
 
 	@SuppressWarnings({ "deprecation", "unused" })
