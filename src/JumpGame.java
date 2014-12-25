@@ -3,6 +3,9 @@ import java.util.Random;
 import javafx.animation.Animation;
 import javafx.animation.AnimationBuilder;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TimelineBuilder;
 import javafx.animation.TranslateTransitionBuilder;
@@ -14,10 +17,14 @@ import javafx.event.EventType;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -43,8 +50,16 @@ public class JumpGame extends Main {
 
 	private Random r;
 
+	private int counter;
+
+	private RotateTransition rt1;
+	private RotateTransition rt2;
+
 	private ImageView[] ivArray;
 	private ImageView[] platformArray;
+
+	private double lastDy;
+	private double currentDy;
 
 	private ImageView birdImageView;
 
@@ -62,6 +77,8 @@ public class JumpGame extends Main {
 	private double birdX, birdY, birdDx, birdDy;
 
 	private boolean hit;
+
+	private Text score;
 
 	public JumpGame() {
 		s = new Stage();
@@ -111,6 +128,8 @@ public class JumpGame extends Main {
 
 		platformArray = new ImageView[5];
 
+		counter = 0;
+
 		platformGroup = new Group();
 
 		for (int i = 0; i < platformArray.length; i++) {
@@ -124,9 +143,32 @@ public class JumpGame extends Main {
 		Group birdGroup = new Group(birdImageView);
 		background.getChildren().add(birdGroup);
 
+		Group HUDGroup = new Group();
+		score = new Text("SCORE: " + counter);
+		score.setFill(Color.GREEN);
+		score.setFont(new Font("Arial Bold", 20));
+		DropShadow dropShadow = new DropShadow(1, 2, 2, Color.YELLOWGREEN);
+		score.setEffect(dropShadow);
+		// score.setFill(Color.BLACK);
+		score.setX(10);
+		score.setY(25);
+		HUDGroup.getChildren().add(score);
+		background.getChildren().add(HUDGroup);
+
+		platformGroup.setEffect(new DropShadow(5, 3, 3, Color.BLACK));
 		allignPlatformConfiguration();
 
 		animateBackgroundUsingTimeline();
+
+		rt1 = new RotateTransition(Duration.millis(500), birdGroup);
+		rt1.setToAngle(30);
+
+		rt2 = new RotateTransition(Duration.millis(500), birdGroup);
+		rt2.setToAngle(-30);
+
+		ScaleTransition st = new ScaleTransition(Duration.millis(300), birdGroup);
+
+		lastDy = currentDy = birdDy;
 
 		s.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -134,9 +176,14 @@ public class JumpGame extends Main {
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.LEFT | event.getCode() == KeyCode.A) {
 					birdDx = -5;
+					st.setToX(-1);
+					st.play();
+
 				}
 				if (event.getCode() == KeyCode.RIGHT | event.getCode() == KeyCode.D) {
 					birdDx = 5;
+					st.setToX(1);
+					st.play();
 				}
 
 			}
@@ -158,16 +205,31 @@ public class JumpGame extends Main {
 
 	private void updateBird() {
 
+		currentDy = birdDy;
 		if (hit) {
 			birdDy = -birdDy;
 			hit = false;
 		} else {
 			birdDy = (birdDy * dT) + (.5 * gravity * dT * dT);
 		}
+
+		reverseAnimation();
+
 		birdX += birdDx;
 		birdY += birdDy;
 		birdImageView.setX(birdX);
 		birdImageView.setY(birdY);
+		lastDy = birdDy;
+	}
+
+	private void reverseAnimation() {
+		if (birdDy < 0) {
+			if (rt2.getStatus() != Animation.Status.RUNNING)
+				rt2.play();
+		} else if (birdDy > 0) {
+			if (rt1.getStatus() != Animation.Status.RUNNING)
+				rt1.play();
+		}
 	}
 
 	private void allignPlatformConfiguration() {
@@ -207,7 +269,7 @@ public class JumpGame extends Main {
 				backgroundX -= backgroundDx;
 
 				for (int i = 0; i < platformArray.length; i++) {
-					platformArray[i].setX(platformArray[i].getX() - .85);
+					platformArray[i].setX(platformArray[i].getX() - .85 - (.08 * counter));
 					if (birdX + 35 >= platformArray[i].getX() && birdX <= (platformArray[i].getX() + 104)) {
 						if (birdY + 35 >= platformArray[i].getY() && birdY + 35 <= platformArray[i].getY() + 30
 								&& birdDy > 0) {
@@ -215,8 +277,11 @@ public class JumpGame extends Main {
 						}
 					}
 					if (platformArray[i].getX() + 104 < 0) {
-						platformArray[i].setX(WIDTH + r.nextInt(120));
-						platformArray[i].setY(170 + r.nextInt(100));
+						platformArray[i].setX(WIDTH + (20 * counter));
+						platformArray[i].setY(120 + r.nextInt(150));
+						counter += 1;
+						score.setText("SCORE: " + counter);
+						System.out.println("Counter = " + counter);
 					}
 				}
 
